@@ -1,8 +1,6 @@
-import { createContext, useState } from 'react';
+import { useState } from 'react';
+import { AuthContext } from './auth-context'; // <-- Importa el contexto desde el nuevo archivo
 
-    const AuthContext = createContext(null);
-
-    // Cambia aquí: "export function" por "export default function"
     export default function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
 
