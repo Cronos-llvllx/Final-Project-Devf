@@ -1,0 +1,20 @@
+{
+  "name": "final-project-devf",
+  "version": "1.0.0",
+  "description": "Proyecto: Registro de Actividades Deportivas 🚴\r Descripción del Proyecto\r Esta será una aplicación web diseñada para que los usuarios puedan registrar, visualizar y gestionar sus actividades deportivas de forma personal. El objetivo principal es ofrecer una herramienta simple y eficiente para monitorear el progreso físico y mantener un historial de entrenamientos, como carreras, ciclismo, natación, entre otros.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cronos-llvllx/Final-Project-Devf.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cronos-llvllx/Final-Project-Devf/issues"
+  },
+  "homepage": "https://github.com/Cronos-llvllx/Final-Project-Devf#readme"
+}
