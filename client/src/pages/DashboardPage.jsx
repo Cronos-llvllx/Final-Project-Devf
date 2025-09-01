@@ -6,34 +6,30 @@ const API_URL = 'http://localhost:3001/api/activities';
     function DashboardPage() {
     const [activities, setActivities] = useState([]);
 
-    // Función para obtener todas las actividades del backend
     const fetchActivities = async () => {
         const response = await fetch(API_URL);
         const data = await response.json();
         setActivities(data);
     };
 
-    // useEffect se ejecuta una vez cuando el componente se carga
     useEffect(() => {
         fetchActivities();
     }, []);
 
-    // Función para agregar una nueva actividad
     const handleAddActivity = async (activityData) => {
         await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(activityData)
         });
-        fetchActivities(); // Actualiza la lista después de agregar
+        fetchActivities();
     };
 
-    // Función para eliminar una actividad
     const handleDeleteActivity = async (id) => {
         await fetch(`${API_URL}/${id}`, {
         method: 'DELETE'
         });
-        fetchActivities(); // Actualiza la lista después de eliminar
+        fetchActivities();
     };
 
     return (
@@ -42,8 +38,10 @@ const API_URL = 'http://localhost:3001/api/activities';
         <ActivityForm onAddActivity={handleAddActivity} />
         <hr />
         <h2>Mis Registros</h2>
+        {/* Aquí SÍ se usa la variable 'activities' */}
         {activities.length > 0 ? (
             <ul>
+            {/* Y aquí también se usa */}
             {activities.map(activity => (
                 <li key={activity.id}>
                 <strong>{activity.type}</strong> - {activity.distance} en {activity.duration}
@@ -60,4 +58,4 @@ const API_URL = 'http://localhost:3001/api/activities';
     );
     }
 
-    export default DashboardPage;
+export default DashboardPage;
