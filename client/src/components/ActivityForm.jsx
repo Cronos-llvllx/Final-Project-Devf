@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, memo } from 'react'; // 1. Importa memo
 import { z } from 'zod'; // Importa Zod
 
-    // 1. Define el mismo esquema que en el backend (o uno similar para el frontend)
+// Define el mismo esquema que en el backend (o uno similar para el frontend)
     const activitySchema = z.object({
     type: z.string().min(3, "El tipo debe tener al menos 3 caracteres"),
     distance: z.string().min(1, "La distancia es obligatoria"),
@@ -10,7 +10,7 @@ import { z } from 'zod'; // Importa Zod
 
     function ActivityForm({ onAddActivity }) {
     const [formData, setFormData] = useState({ type: '', distance: '', duration: '' });
-    // 2. Estado para guardar los errores de validación
+    // Estado para guardar los errores de validación
     const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
@@ -22,7 +22,7 @@ import { z } from 'zod'; // Importa Zod
         e.preventDefault();
         setErrors({}); // Limpia errores anteriores
 
-        // 3. Valida los datos del formulario con Zod
+        // Valida los datos del formulario con Zod
         const result = activitySchema.safeParse(formData);
 
         if (!result.success) {
@@ -35,7 +35,7 @@ import { z } from 'zod'; // Importa Zod
         return; // Detiene el envío
         }
 
-        // 4. Si la validación es exitosa, envía los datos
+        // Si la validación es exitosa, envía los datos
         const newActivity = {
         ...result.data,
         date: new Date().toISOString().split('T')[0]
@@ -66,4 +66,4 @@ import { z } from 'zod'; // Importa Zod
     );
     }
 
-export default ActivityForm;
+export default memo(ActivityForm);
