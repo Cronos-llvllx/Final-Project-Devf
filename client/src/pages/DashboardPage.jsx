@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'; // 1. Importa useCallback y useMemo
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import ActivityForm from '../components/ActivityForm';
 
 const API_URL = 'http://localhost:3001/api/activities';
@@ -6,8 +6,9 @@ const API_URL = 'http://localhost:3001/api/activities';
     function DashboardPage() {
     const [activities, setActivities] = useState([]);
     const [apiError, setApiError] = useState(null);
+    // Nuevo estado para la UI optimista al eliminar
+    const [deletingId, setDeletingId] = useState(null);
 
-    // Optimizada con useCallback para que no se cree en cada render.
     const fetchActivities = useCallback(async () => {
         try {
         setApiError(null);
@@ -18,13 +19,12 @@ const API_URL = 'http://localhost:3001/api/activities';
         } catch (error) {
         setApiError(error.message);
         }
-    }, []); // <-- El array vacío significa que esta función NUNCA cambiará.
+    }, []);
 
     useEffect(() => {
         fetchActivities();
     }, [fetchActivities]);
 
-    // 2. Optimizamos handleAddActivity con useCallback
     const handleAddActivity = useCallback(async (activityData) => {
         try {
         setApiError(null);
@@ -37,31 +37,43 @@ const API_URL = 'http://localhost:3001/api/activities';
             const errorData = await response.json();
             throw new Error(errorData.message || 'Error al agregar la actividad.');
         }
-        fetchActivities(); // Llama a la versión memorizada
-        } catch (error) {
-        setApiError(error.message);
-        }
-    }, [fetchActivities]); // Depende de fetchActivities (que está memorizada)
-
-    // 3. Optimizamos handleDeleteActivity con useCallback
-    const handleDeleteActivity = useCallback(async (id) => {
-        try {
-        setApiError(null);
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         fetchActivities();
         } catch (error) {
         setApiError(error.message);
         }
     }, [fetchActivities]);
 
-    // 4. Implementamos useMemo para un cálculo derivado
-    // Este valor solo se recalculará si el array 'activities' cambia.
+    // Función de eliminar mejorada con UI Optimista
+    const handleDeleteActivity = useCallback(async (idToDelete) => {
+        const previousActivities = [...activities]; // Guarda el estado actual para revertir en caso de error
+
+        // Actualiza la UI inmediatamente
+        setActivities(currentActivities => currentActivities.filter(activity => activity.id !== idToDelete));
+        setDeletingId(idToDelete); // Activa el estado de carga para este item
+        setApiError(null);
+
+        try {
+        // Envía la petición al servidor en segundo plano
+        const response = await fetch(`${API_URL}/${idToDelete}`, { method: 'DELETE' });
+        if (!response.ok) {
+            throw new Error('No se pudo eliminar la actividad.');
+        }
+        } catch (error) {
+        // Si hay un error, revierte la UI al estado anterior y muestra el mensaje
+        setApiError(error.message);
+        setActivities(previousActivities);
+        } finally {
+        // Quita el estado de carga
+        setDeletingId(null);
+        }
+    }, [activities]); // Ahora depende de 'activities' para poder revertir el estado
+
+    // Cálculo memorizado del total de actividades
     const totalActivities = useMemo(() => activities.length, [activities]);
 
     return (
         <div>
         <h1>Dashboard de Actividades</h1>
-        {/* Pasamos la función memorizada al componente hijo */}
         <ActivityForm onAddActivity={handleAddActivity} />
         <hr />
         <h2>Mis Registros ({totalActivities} en total)</h2>
@@ -70,10 +82,15 @@ const API_URL = 'http://localhost:3001/api/activities';
             <ul>
             {activities.map(activity => (
                 <li key={activity.id}>
-                <strong>{activity.type}</strong> - {activity.distance} en {activity.duration}
-                {/* Usamos la función memorizada */}
-                <button onClick={() => handleDeleteActivity(activity.id)} style={{ marginLeft: '10px' }}>
-                    🗑️ Eliminar
+                <span>
+                    <strong>{activity.type}</strong> - {activity.distance} en {activity.duration}
+                </span>
+                <button
+                    onClick={() => handleDeleteActivity(activity.id)}
+                    disabled={deletingId === activity.id} // Deshabilita el botón mientras se borra
+                    style={{ marginLeft: '10px' }}
+                >
+                    {deletingId === activity.id ? 'Eliminando...' : '🗑️ Eliminar'}
                 </button>
                 </li>
             ))}
